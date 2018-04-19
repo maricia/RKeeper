@@ -13,26 +13,38 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.maricia.claim.model.Attachment;
+import com.maricia.claim.model.ClaimItem;
 import com.maricia.claim.ui.CategoryPickerFragment;
 import com.maricia.claim.ui.DatePickerWrapper;
 import com.maricia.claim.ui.IconPickerWrapper;
+import com.maricia.claim.ui.attachments.AttachmentPagerFragment;
 import com.maricia.claim.widget.DatePickerLayout;
 
 public class CaptureClaimActivity extends AppCompatActivity implements View.OnClickListener {
 
     private DatePickerLayout selectDate;
     private CategoryPickerFragment categories;
-   // private RadioGroup categories;
+    private AttachmentPagerFragment attachments;
+    private EditText description;
+    private EditText amount;
+    private ClaimItem claimItem;
 
     private static final String TAG = "CaptureClaimActivity";
+    public static final String EXTRA_CLAIM_ITEM = "com.maricia.claim.extras.CLAIM_ITEM";
+    private static final String KEY_CLAIM_ITEM ="com.maricia.claim.ClaimItem";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,60 +58,60 @@ public class CaptureClaimActivity extends AppCompatActivity implements View.OnCl
 
         //selectDate = new DatePickerWrapper((TextView)findViewById(R.id.date) );
         selectDate = (DatePickerLayout)findViewById(R.id.date);
+        description = (EditText)findViewById(R.id.description);
+        amount = (EditText)findViewById(R.id.amount);
+
 
        final FragmentManager fragmentManager = getSupportFragmentManager();
        categories = (CategoryPickerFragment) fragmentManager.findFragmentById(R.id.categories);
+       attachments = (AttachmentPagerFragment)fragmentManager.findFragmentById(R.id.attachments);
 
+       //where is the claim item coming from???
+       if(savedInstanceState !=null){
+           claimItem = savedInstanceState.getParcelable(KEY_CLAIM_ITEM);
+       }else if(getIntent().hasExtra(EXTRA_CLAIM_ITEM)){
+           claimItem = getIntent().getParcelableExtra(EXTRA_CLAIM_ITEM);
+       }
+        //if no claim item is being passed in then do this
+        if(claimItem == null){
+           claimItem = new ClaimItem();
+        }else {
+           description.setText(claimItem.getDescription());
+           amount.setText(String.format("%f", claimItem.getAmount()));
+           selectDate.setDate(claimItem.getTimestamp());
+        }
+        attachments.setClaimItem(claimItem);
+    }
+
+
+    void captureClaimItem(){
+        claimItem.setDescription(description.getText().toString());
+        if(!TextUtils.isEmpty(amount.getText())){
+            claimItem.setAmount(Double.parseDouble(amount.getText().toString()));
+        }
+        claimItem.setTimestamp(selectDate.getDate());
+        claimItem.setCategory(categories.getSelectedCategory());
+    }
+    @Override
+    protected void onSaveInstanceState(final Bundle outState){
+        super.onSaveInstanceState(outState);
+        captureClaimItem(); //make sure the claim item is up to date
+        outState.putParcelable(KEY_CLAIM_ITEM, claimItem);
+    }
+    @Override
+    public void finish(){
+        captureClaimItem();
+        setResult(RESULT_OK, new Intent().putExtra(EXTRA_CLAIM_ITEM, claimItem));
+        super.finish();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.attach:
-                onAttachClick();
+                attachments.onAttachClick();
                 break;
         }
-    }
-
-    public void onAttachClick() {
-        final int permissionStatus = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if(permissionStatus != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_ATTACH_PERMISSION);
-            return;
-        }
-
-        Log.d(TAG, "onAttachClick: 3");
-        Intent attach = new Intent(Intent.ACTION_GET_CONTENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*");
-        startActivityForResult(attach, REQUEST_ATTACH_FILE);
-
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_ATTACH_PERMISSION:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onAttachClick();
-                }
-                break;
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
-            case REQUEST_ATTACH_FILE:
-                onAttachFileResults(requestCode, data);
-                break;
-        }
-    }
-
-    private void onAttachFileResults(int requestCode, Intent data) {
-        if(requestCode == RESULT_OK || data == null || data.getData() == null){
-            return;
-        }
-        Toast.makeText(this, data.getDataString(), Toast.LENGTH_LONG).show();
     }
 
 
@@ -115,14 +127,14 @@ public class CaptureClaimActivity extends AppCompatActivity implements View.OnCl
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()){
+            case android.R.id.home:
+                finish();
+                break;
+                default:
+                    return false;
         }
-
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
 }

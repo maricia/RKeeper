@@ -27,8 +27,7 @@ public class CategoryPickerFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View picker = inflater.inflate(R.layout.fragment_category_picker, container, false);
         categories = (RadioGroup) picker.findViewById(R.id.categories);
@@ -36,7 +35,6 @@ public class CategoryPickerFragment extends Fragment {
         categories.setOnCheckedChangeListener(new IconPickerWrapper(categoryLabel));
         categories.check(R.id.other);
         return picker;
-
     }
 
     public Category getSelectedCategory(){

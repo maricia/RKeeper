@@ -17,34 +17,8 @@ public class ClaimItem implements Parcelable {
     List<Attachment> attachments = new ArrayList<>();
 
     public ClaimItem() {
-
     }
-
-    protected ClaimItem(Parcel in) {
-        description = in.readString();
-        amount = in.readDouble();
-        attachments = in.createTypedArrayList(Attachment.CREATOR);
-        final long time = in.readLong();
-        timestamp = time != -1 ? new Date(time) : null;
-
-        final int categoryOrd = in.readInt();
-        category = categoryOrd != -1
-                ? Category.values()[categoryOrd]
-                : null;
-    }
-
-    public static final Creator<ClaimItem> CREATOR = new Creator<ClaimItem>() {
-        @Override
-        public ClaimItem createFromParcel(Parcel in) {
-            return new ClaimItem(in);
-        }
-
-        @Override
-        public ClaimItem[] newArray(int size) {
-            return new ClaimItem[size];
-        }
-    };
-
+    //getters and setters
     public String getDescription() {
         return description;
     }
@@ -77,23 +51,30 @@ public class ClaimItem implements Parcelable {
         this.category = category;
     }
 
+
+    //add, remove, and list attachments
     public void addAttachment(final Attachment attachment) {
         if ((attachment != null) && !attachments.contains(attachment)) {
             attachments.add(attachment);
         }
     }
-
     public void removeAttachment(final Attachment attachment) {
         attachments.remove(attachment);
     }
-
     public List<Attachment> getAttachments() {
         return Collections.unmodifiableList(attachments);
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+
+    //parcelable methods
+    protected ClaimItem(Parcel in) {
+        description = in.readString();
+        amount = in.readDouble();
+        final long time = in.readLong();
+        timestamp = time != -1 ? new Date(time) : null;
+        final int categoryOrd = in.readInt();
+        category = categoryOrd != -1 ? Category.values()[categoryOrd] : null;
+        attachments = in.createTypedArrayList(Attachment.CREATOR);
     }
 
     @Override
@@ -104,4 +85,24 @@ public class ClaimItem implements Parcelable {
         dest.writeLong(timestamp != null ? timestamp.getTime() : -1);
         dest.writeInt(category != null ? category.ordinal() : -1);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<ClaimItem> CREATOR = new Creator<ClaimItem>() {
+        @Override
+        public ClaimItem createFromParcel(Parcel in) {
+
+            return new ClaimItem(in);
+        }
+
+        @Override
+        public ClaimItem[] newArray(int size)
+        {
+            return new ClaimItem[size];
+        }
+    };
+
 }

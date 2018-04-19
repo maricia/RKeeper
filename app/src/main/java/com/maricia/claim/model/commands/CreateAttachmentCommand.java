@@ -31,8 +31,7 @@ public abstract class CreateAttachmentCommand extends ActionCommand<Uri, Attachm
 
 
     File makeFile(final Uri value) throws IOException {
-        final File outputFile =
-                new File(dir, UUID.randomUUID().toString());
+        final File outputFile = new File(dir, UUID.randomUUID().toString());
         final InputStream input = resolver.openInputStream(value);
         final FileOutputStream output = new FileOutputStream(outputFile);
         try {
@@ -49,13 +48,11 @@ public abstract class CreateAttachmentCommand extends ActionCommand<Uri, Attachm
         return outputFile;
     }
 
-
+    @Override
     public Attachment onBackground(final Uri value) throws Exception {
         final File file = makeFile(value);
         final String type = resolver.getType(value);
-        if (type != null
-                && type.startsWith("image/")
-                && BitmapFactory.decodeFile(file.getAbsolutePath()) != null)
+        if (type != null && type.startsWith("image/") && BitmapFactory.decodeFile(file.getAbsolutePath()) != null)
         {
             return new Attachment(file, Attachment.Type.IMAGE);
         } else {

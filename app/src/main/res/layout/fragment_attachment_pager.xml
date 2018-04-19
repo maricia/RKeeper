@@ -10,17 +10,7 @@
     android:clipToPadding="false"
     tools:context=".ui.attachments.AttachmentPagerFragment">
 
-    <android.support.v4.view.ViewPager
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:id="@+id/attachments"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/grid_spacer1"
-        android:layout_marginTop="@dimen/grid_spacer1"
-        android:layout_weight="1">
 
-    </android.support.v4.view.ViewPager>
 
 
 </android.support.v4.view.ViewPager>

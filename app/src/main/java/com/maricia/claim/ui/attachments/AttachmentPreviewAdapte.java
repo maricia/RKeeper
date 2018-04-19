@@ -17,12 +17,8 @@ public class AttachmentPreviewAdapte extends PagerAdapter {
 
     @Override
     public int getCount() {
-        return attachments.size();
-    }
 
-    @Override
-    public boolean isViewFromObject(View view, Object object) {
-        return (view instanceof AttachmentPreview) && (((AttachmentPreview) view).getAttachment() == object);
+        return attachments.size();
     }
 
     public void setAttachments(final List<Attachment> attachments) {
@@ -30,10 +26,13 @@ public class AttachmentPreviewAdapte extends PagerAdapter {
         notifyDataSetChanged();
     }
 
+    @Override
+    public boolean isViewFromObject(View view, Object object) {
+        return (view instanceof AttachmentPreview) && (((AttachmentPreview) view).getAttachment() == object);
+    }
 
     public Object instantiateItem(final ViewGroup container, final int position) {
-        final AttachmentPreview preview =
-                new AttachmentPreview(container.getContext());
+        final AttachmentPreview preview = new AttachmentPreview(container.getContext());
         preview.setAttachment(attachments.get(position));
         container.addView(preview);
         return attachments.get(position);
